@@ -2,7 +2,7 @@
 
 ## Open issues
 
-!`gh issue list --state open --label Sandcastle --limit 100 --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`
+!`gh issue list --state open --label ready-for-agent --limit 100 --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`
 
 The list above has already been filtered to issues ready for work and is the sole source of truth for what work exists. Do not run your own unfiltered query to find more issues — if the list is empty, there is nothing to do.
 
@@ -45,6 +45,10 @@ Pick the highest-priority open issue that is not blocked by another open issue.
 - Do not close an issue until you have committed the fix and verified tests pass.
 - Do not leave commented-out code or TODO comments in committed code.
 - If you are blocked (missing context, failing tests you cannot fix, external dependency), leave a comment on the issue and move on — do not close it.
+CRITICAL ANTI-LOOP RULE:
+- If you have already executed a command or stated your next step, DO NOT repeat the same sentence.
+- If a file (.gitignore or README.md) is already configured, move to the next task immediately.
+- Never output the exact same sentence more than twice. If you get stuck, output <promise>COMPLETE</promise>.
 
 # Done
 

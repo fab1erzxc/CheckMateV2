@@ -79,7 +79,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 1,
-      agent: sandcastle.pi("xiaomi/mimo-v2.5", { thinking: "high" }),
+      agent: sandcastle.pi("deepseek/deepseek-v4-flash"),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
@@ -103,7 +103,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     await sandbox.run({
       name: "reviewer",
       maxIterations: 1,
-      agent: sandcastle.pi("xiaomi/mimo-v2.5-pro", { thinking: "high" }),
+      agent: sandcastle.pi("deepseek/deepseek-v4-pro"),
       promptFile: "./.sandcastle/review-prompt.md",
       promptArgs: {
         BRANCH: branch,
