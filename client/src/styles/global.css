@@ -41,3 +41,21 @@ button {
   cursor: pointer;
   font-family: inherit;
 }
+
+/* Container for page content */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  main {
+    padding: 12px !important;
+  }
+  
+  .container {
+    padding: 0;
+  }
+}
