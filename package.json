@@ -1,5 +1,19 @@
 {
+  "name": "checkmate",
+  "version": "1.0.0",
+  "description": "Smart receipt scanner, expense tracker, and debt calculator",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "test": "cd server && npm test",
+    "typecheck": "cd client && npm run typecheck && cd ../server && npm run typecheck"
+  },
   "devDependencies": {
-    "@ai-hero/sandcastle": "^0.10.0"
+    "concurrently": "^8.2.2"
   }
 }
