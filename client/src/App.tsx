@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Stats from './pages/Stats'
 import Balance from './pages/Balance'
 import Dictionary from './pages/Dictionary'
+import TextEntry from './pages/TextEntry'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="stats" element={<Stats />} />
           <Route path="balance" element={<Balance />} />
           <Route path="dictionary" element={<Dictionary />} />
+          <Route path="entry/text" element={<TextEntry />} />
         </Route>
       </Routes>
     </BrowserRouter>
