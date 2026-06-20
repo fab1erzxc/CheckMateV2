@@ -6,6 +6,7 @@ import healthRouter from './routes/health'
 import path from 'path'
 import { getDatabase, setDbPath } from './db/database'
 import { initializeDatabase } from './db/init'
+import { seedDatabase } from './db/seed'
 
 dotenv.config()
 
@@ -17,6 +18,9 @@ setDbPath(path.join(serverRoot, 'data.db'))
 const db = getDatabase()
 initializeDatabase(db)
 console.log('Database initialized successfully')
+
+// Seed default data
+seedDatabase(db)
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3000', 10)
