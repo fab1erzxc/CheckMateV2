@@ -6,6 +6,8 @@ import Balance from './pages/Balance'
 import Dictionary from './pages/Dictionary'
 import TextEntry from './pages/TextEntry'
 import PhotoEntry from './pages/PhotoEntry'
+import ReceiptList from './pages/ReceiptList'
+import ReceiptDetail from './pages/ReceiptDetail'
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
           <Route path="dictionary" element={<Dictionary />} />
           <Route path="entry/text" element={<TextEntry />} />
           <Route path="entry/photo" element={<PhotoEntry />} />
+          <Route path="receipts" element={<ReceiptList />} />
+          <Route path="receipts/:id" element={<ReceiptDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

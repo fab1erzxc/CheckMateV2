@@ -49,6 +49,27 @@ function Home() {
             Scan a receipt photo
           </div>
         </button>
+
+        <button
+          onClick={() => navigate('/receipts')}
+          style={{
+            padding: '20px',
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            textAlign: 'left',
+            color: 'var(--text-primary)',
+          }}
+        >
+          <div style={{ fontSize: '24px', marginBottom: '8px' }}>📋</div>
+          <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+            View Receipts
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            Edit or delete past receipts
+          </div>
+        </button>
       </div>
     </div>
   )
