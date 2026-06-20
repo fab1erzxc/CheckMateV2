@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { errorHandler } from './middleware/errorHandler'
 import healthRouter from './routes/health'
+import receiptsRouter from './routes/receipts'
 import path from 'path'
 import { getDatabase, setDbPath } from './db/database'
 import { initializeDatabase } from './db/init'
@@ -30,6 +31,7 @@ app.use(express.json())
 
 // Routes
 app.use('/api/health', healthRouter)
+app.use('/api/receipts', receiptsRouter)
 
 // Error handler
 app.use(errorHandler)
