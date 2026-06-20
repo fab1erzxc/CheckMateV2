@@ -3,8 +3,20 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { errorHandler } from './middleware/errorHandler'
 import healthRouter from './routes/health'
+import path from 'path'
+import { getDatabase, setDbPath } from './db/database'
+import { initializeDatabase } from './db/init'
 
 dotenv.config()
+
+// Set database path to server root
+const serverRoot = path.resolve(__dirname, '..')
+setDbPath(path.join(serverRoot, 'data.db'))
+
+// Initialize database
+const db = getDatabase()
+initializeDatabase(db)
+console.log('Database initialized successfully')
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3000', 10)
