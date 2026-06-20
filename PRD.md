@@ -213,6 +213,19 @@ OPENROUTER_API_KEY=xxx
 - Mixed Turkish/English text
 - Various currencies (primarily Turkish Lira)
 
+### Issue Tracker
+All issues have been created in GitHub: https://github.com/fab1erzxc/CheckMateV2/issues
+Issues are labeled with `ready-for-agent` and numbered #1-#7.
+
+### Development Order
+1. Project Skeleton & PWA Foundation (#1)
+2. Text Entry with AI Parsing (#2)
+3. Receipt Photo Entry (#3)
+4. Receipt Editing & Dictionary (#4)
+5. Debt Calculation & Balance (#5)
+6. Statistics & Export (#6)
+7. Backup System (#7)
+
 ### Future Considerations (Out of Scope Now)
 - Full multi-currency support with conversion
 - Advanced AI for better receipt parsing
