@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS debts (
 
 CREATE TABLE IF NOT EXISTS debt_settlements (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  debt_id INTEGER REFERENCES debts(id),
+  from_user_id INTEGER REFERENCES users(id),
+  to_user_id INTEGER REFERENCES users(id),
   amount REAL NOT NULL,
   settled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

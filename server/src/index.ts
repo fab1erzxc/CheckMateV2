@@ -7,6 +7,7 @@ import receiptsRouter from './routes/receipts'
 import dictionaryRouter from './routes/dictionary'
 import parseRouter from './routes/parse'
 import categoriesRouter from './routes/categories'
+import balanceRouter from './routes/balance'
 import path from 'path'
 import { getDatabase, setDbPath } from './db/database'
 import { initializeDatabase } from './db/init'
@@ -38,6 +39,7 @@ app.use('/api/receipts', receiptsRouter)
 app.use('/api/dictionary', dictionaryRouter)
 app.use('/api/parse', parseRouter)
 app.use('/api/categories', categoriesRouter)
+app.use('/api', balanceRouter)
 
 // Error handler
 app.use(errorHandler)
