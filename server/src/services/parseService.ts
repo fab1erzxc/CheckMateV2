@@ -20,15 +20,3 @@ export async function parseReceiptImageFromBase64(
 ): Promise<ParseResult> {
   return parseReceiptImage(imageBase64, mimeType)
 }
-
-// Mock for testing
-export function getMockParseResult(): ParseResult {
-  return {
-    success: true,
-    items: [
-      { raw_text: 'Coca-Cola 40 lira', price: 40 },
-      { raw_text: 'Bread 15 lira', price: 15 },
-      { raw_text: 'Eggs 60 lira', price: 60 },
-    ],
-  }
-}

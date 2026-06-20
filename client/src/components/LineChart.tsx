@@ -12,11 +12,11 @@ interface DataItem {
   amount: number
 }
 
-interface MyLineChartProps {
+interface LineChartProps {
   data: DataItem[]
 }
 
-function MyLineChart({ data }: MyLineChartProps) {
+function LineChart({ data }: LineChartProps) {
   if (data.length === 0) {
     return (
       <div
@@ -67,4 +67,4 @@ function MyLineChart({ data }: MyLineChartProps) {
   )
 }
 
-export default MyLineChart
+export default LineChart

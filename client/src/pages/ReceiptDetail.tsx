@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import CategorySelect from '../components/CategorySelect'
 import OwnerToggle from '../components/OwnerToggle'
+import { DEFAULT_CATEGORIES } from '../utils'
 
 interface Item {
   id: number
@@ -59,16 +60,7 @@ function ReceiptDetail() {
       if (catRes.ok) {
         setCategories(await catRes.json())
       } else {
-        setCategories([
-          { id: 1, name: 'базовая еда' },
-          { id: 2, name: 'сладости/снэки' },
-          { id: 3, name: 'алкоголь' },
-          { id: 4, name: 'курево' },
-          { id: 5, name: 'утварь/химия для дома' },
-          { id: 6, name: 'транспорт' },
-          { id: 7, name: 'коммуналка' },
-          { id: 8, name: 'другое' },
-        ])
+        setCategories(DEFAULT_CATEGORIES)
       }
     } catch {
       setError('Network error')

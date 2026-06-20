@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import FilterPanel from '../components/FilterPanel'
 import StatsSection from '../components/StatsSection'
 import ExportButton from '../components/ExportButton'
+import { DEFAULT_CATEGORIES } from '../utils'
 
 interface Category {
   id: number
@@ -52,16 +53,7 @@ function Stats() {
       const res = await fetch('/api/categories')
       if (res.ok) setCategories(await res.json())
     } catch {
-      setCategories([
-        { id: 1, name: 'базовая еда' },
-        { id: 2, name: 'сладости/снэки' },
-        { id: 3, name: 'алкоголь' },
-        { id: 4, name: 'курево' },
-        { id: 5, name: 'утварь/химия для дома' },
-        { id: 6, name: 'транспорт' },
-        { id: 7, name: 'коммуналка' },
-        { id: 8, name: 'другое' },
-      ])
+      setCategories(DEFAULT_CATEGORIES)
     }
   }
 
@@ -72,7 +64,6 @@ function Stats() {
     try {
       const params = new URLSearchParams()
       params.set('period', period)
-      params.set('person', 'both')
       if (selectedCategories.length > 0) {
         params.set('category', selectedCategories.join(','))
       }
@@ -82,7 +73,7 @@ function Stats() {
       }
 
       const [totalRes, myRes, herRes] = await Promise.all([
-        fetch(`/api/stats?${params}`),
+        fetch(`/api/stats?${params}&person=both`),
         fetch(`/api/stats?${params}&person=user`),
         fetch(`/api/stats?${params}&person=girlfriend`),
       ])

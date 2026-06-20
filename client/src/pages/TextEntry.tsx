@@ -1,18 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import TextInputForm from '../components/TextInputForm'
 import ParsedItemsTable, { ParsedItem } from '../components/ParsedItemsTable'
 import DatePicker from '../components/DatePicker'
+import { DEFAULT_CATEGORIES, getToday } from '../utils'
 
 interface Category {
   id: number
   name: string
 }
-
-function getToday(): string {
-  return new Date().toISOString().split('T')[0]
-}
-
-let nextItemId = 1
 
 function TextEntry() {
   const [step, setStep] = useState<'input' | 'review' | 'done'>('input')
@@ -22,8 +17,8 @@ function TextEntry() {
   const [items, setItems] = useState<ParsedItem[]>([])
   const [date, setDate] = useState(getToday)
   const [categories, setCategories] = useState<Category[]>([])
+  const nextId = useRef(1)
 
-  // Load categories on mount
   useEffect(() => {
     fetchCategories()
   }, [])
@@ -36,17 +31,7 @@ function TextEntry() {
         setCategories(data)
       }
     } catch {
-      // Categories endpoint may not exist yet; use defaults
-      setCategories([
-        { id: 1, name: 'базовая еда' },
-        { id: 2, name: 'сладости/снэки' },
-        { id: 3, name: 'алкоголь' },
-        { id: 4, name: 'курево' },
-        { id: 5, name: 'утварь/химия для дома' },
-        { id: 6, name: 'транспорт' },
-        { id: 7, name: 'коммуналка' },
-        { id: 8, name: 'другое' },
-      ])
+      setCategories(DEFAULT_CATEGORIES)
     }
   }
 
@@ -66,7 +51,7 @@ function TextEntry() {
       if (data.success && data.items && data.items.length > 0) {
         setItems(
           data.items.map((item: { raw_text: string; price: number }) => ({
-            id: nextItemId++,
+            id: nextId.current++,
             raw_text: item.raw_text,
             price: item.price,
             category_id: null,
@@ -98,7 +83,7 @@ function TextEntry() {
     setItems((prev) => [
       ...prev,
       {
-        id: nextItemId++,
+        id: nextId.current++,
         raw_text: '',
         price: 0,
         category_id: null,

@@ -37,10 +37,3 @@ export interface Receipt {
   item_count?: number
 }
 
-export interface ReceiptListItem {
-  id: number
-  date: string
-  payer_name: string
-  total_amount: number
-  item_count: number
-}

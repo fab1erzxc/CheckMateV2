@@ -1,20 +1,6 @@
 import Database from 'better-sqlite3'
 import { BalanceResult, DebtDetail } from '../types/debt'
 
-interface ReceiptWithItems {
-  id: number
-  payer_id: number
-  items: Array<{
-    price: number
-    owner: 'user' | 'girlfriend' | '50-50'
-  }>
-}
-
-interface UserRow {
-  id: number
-  name: string
-}
-
 interface SettlementRow {
   id: number
   from_user_id: number

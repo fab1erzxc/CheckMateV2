@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PhotoCapture from '../components/PhotoCapture'
 import PhotoPreview from '../components/PhotoPreview'
 import ParsedItemsTable, { ParsedItem } from '../components/ParsedItemsTable'
 import DatePicker from '../components/DatePicker'
+import { DEFAULT_CATEGORIES, getToday, base64ToBlob } from '../utils'
 
 interface Category {
   id: number
   name: string
 }
-
-function getToday(): string {
-  return new Date().toISOString().split('T')[0]
-}
-
-let nextItemId = 1
 
 function PhotoEntry() {
   const [step, setStep] = useState<'capture' | 'preview' | 'parsing' | 'review' | 'saving' | 'done'>('capture')
@@ -24,6 +19,7 @@ function PhotoEntry() {
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
+  const nextId = useRef(1)
 
   useEffect(() => {
     fetchCategories()
@@ -37,16 +33,7 @@ function PhotoEntry() {
         setCategories(data)
       }
     } catch {
-      setCategories([
-        { id: 1, name: 'базовая еда' },
-        { id: 2, name: 'сладости/снэки' },
-        { id: 3, name: 'алкоголь' },
-        { id: 4, name: 'курево' },
-        { id: 5, name: 'утварь/химия для дома' },
-        { id: 6, name: 'транспорт' },
-        { id: 7, name: 'коммуналка' },
-        { id: 8, name: 'другое' },
-      ])
+      setCategories(DEFAULT_CATEGORIES)
     }
   }
 
@@ -78,7 +65,7 @@ function PhotoEntry() {
       if (data.success && data.items && data.items.length > 0) {
         setItems(
           data.items.map((item: { raw_text: string; price: number }) => ({
-            id: nextItemId++,
+            id: nextId.current++,
             raw_text: item.raw_text,
             price: item.price,
             category_id: null,
@@ -94,16 +81,6 @@ function PhotoEntry() {
       setError('Network error. Please try again.')
       setStep('preview')
     }
-  }
-
-  function base64ToBlob(base64: string, mimeType: string): Blob {
-    const byteChars = atob(base64)
-    const bytes = new ArrayBuffer(byteChars.length)
-    const view = new Uint8Array(bytes)
-    for (let i = 0; i < byteChars.length; i++) {
-      view[i] = byteChars.charCodeAt(i)
-    }
-    return new Blob([bytes], { type: mimeType })
   }
 
   function handleRetake() {
@@ -126,7 +103,7 @@ function PhotoEntry() {
     setItems((prev) => [
       ...prev,
       {
-        id: nextItemId++,
+        id: nextId.current++,
         raw_text: '',
         price: 0,
         category_id: null,
