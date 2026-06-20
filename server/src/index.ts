@@ -5,6 +5,7 @@ import { errorHandler } from './middleware/errorHandler'
 import healthRouter from './routes/health'
 import receiptsRouter from './routes/receipts'
 import dictionaryRouter from './routes/dictionary'
+import parseRouter from './routes/parse'
 import path from 'path'
 import { getDatabase, setDbPath } from './db/database'
 import { initializeDatabase } from './db/init'
@@ -34,6 +35,7 @@ app.use(express.json())
 app.use('/api/health', healthRouter)
 app.use('/api/receipts', receiptsRouter)
 app.use('/api/dictionary', dictionaryRouter)
+app.use('/api/parse', parseRouter)
 
 // Error handler
 app.use(errorHandler)
