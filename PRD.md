@@ -215,16 +215,25 @@ OPENROUTER_API_KEY=xxx
 
 ### Issue Tracker
 All issues have been created in GitHub: https://github.com/fab1erzxc/CheckMateV2/issues
-Issues are labeled with `ready-for-agent` and numbered #1-#7.
+Issues are labeled with `ready-for-agent` and numbered #8-#23.
 
 ### Development Order
-1. Project Skeleton & PWA Foundation (#1)
-2. Text Entry with AI Parsing (#2)
-3. Receipt Photo Entry (#3)
-4. Receipt Editing & Dictionary (#4)
-5. Debt Calculation & Balance (#5)
-6. Statistics & Export (#6)
-7. Backup System (#7)
+1. Initialize project structure (#8)
+2. Set up React frontend with dark theme (#9)
+3. Set up Express backend (#10)
+4. Create SQLite database schema (#11)
+5. Seed database with default data (#12)
+6. Implement receipt CRUD API (#13)
+7. Implement dictionary CRUD API (#14)
+8. Implement DeepSeek text parsing service (#15)
+9. Implement Gemini Vision photo parsing service (#16)
+10. Create text input page (#17)
+11. Create photo capture page (#18)
+12. Create receipt editing page (#19)
+13. Implement debt calculation logic (#20)
+14. Create balance page (#21)
+15. Implement statistics aggregation (#22)
+16. Create statistics page with charts (#23)
 
 ### Future Considerations (Out of Scope Now)
 - Full multi-currency support with conversion
