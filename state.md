@@ -162,11 +162,30 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - Ранее словарь пополнялся только через ReceiptDetail (редактирование существующего чека)
    - Теперь при сохранении любого чека, каждый товар с category_id добавляется в dictionary
 
+### 2026-06-21 (третья сессия) — Реализация issues 004-006
+
+12. **Issue 004 — Выбор плательщика:**
+   - Создан компонент `PayerToggle` (Макар / Ксюша)
+   - Добавлен в TextEntry, PhotoEntry, ReceiptDetail на шаге review
+   - `payer_id` больше не захардкожен = 1, передаётся из выбора пользователя
+   - Пофикшен баг: `balanceRouter` был замаунчен на `/api` вместо `/api/balance` → 404
+   - Исправлены пути settlement/settlements в клиенте
+
+13. **Issue 005 — Виджет баланса на Home:**
+   - Home загружает `GET /api/balance` при монтировании
+   - Показывает сумму долга, направление (кто кому должен), ссылка на /balance
+   - При ошибке загрузки тихо скрывается
+
+14. **Issue 006 — Умный дефолт owner:**
+   - Если плательщик = Ксюша → новые товары по умолчанию `owner: 'girlfriend'`
+   - Если плательщик = Макар → новые товары по умолчанию `owner: 'user'`
+   - Кнопка "Set all to: Me / Her / 50/50" в ParsedItemsTable
+
 ---
 
 ## Known Issues / Limitations
 
-- ❌ **CRITICAL: payer_id захардкожен = 1** — в `TextEntry.tsx` и `PhotoEntry.tsx` нет UI выбора кто заплатил. Долги не считаются. Issue [#004](./issues/004-payer-selector.md)
+- ✅ **payer_id больше не захардкожен** — добавлен PayerToggle (Макар/Ксюша) в TextEntry, PhotoEntry, ReceiptDetail
 - ❌ **OpenRouter не подключён** — есть ключ в `.env`, но код fallback'а не написан
 - ✅ **Словарь пополняется** — при сохранении чека (TextEntry, PhotoEntry, ReceiptDetail) товары с category_id автоматически добавляются в dictionary
 - ❌ **Backup'ы не работают** — папка `backups/` описана, но код авто-бэкапа не реализован

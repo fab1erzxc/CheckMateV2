@@ -41,7 +41,7 @@ app.use('/api/receipts', receiptsRouter)
 app.use('/api/dictionary', dictionaryRouter)
 app.use('/api/parse', parseRouter)
 app.use('/api/categories', categoriesRouter)
-app.use('/api', balanceRouter)
+app.use('/api/balance', balanceRouter)
 app.use('/api/stats', statsRouter)
 
 // Error handler

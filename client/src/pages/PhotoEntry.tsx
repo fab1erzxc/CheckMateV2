@@ -3,6 +3,7 @@ import PhotoCapture from '../components/PhotoCapture'
 import PhotoPreview from '../components/PhotoPreview'
 import ParsedItemsTable, { ParsedItem } from '../components/ParsedItemsTable'
 import DatePicker from '../components/DatePicker'
+import PayerToggle from '../components/PayerToggle'
 import { DEFAULT_CATEGORIES, getToday, base64ToBlob } from '../utils'
 
 interface Category {
@@ -15,11 +16,16 @@ function PhotoEntry() {
   const [imageBase64, setImageBase64] = useState<string | null>(null)
   const [mimeType, setMimeType] = useState('image/jpeg')
   const [items, setItems] = useState<ParsedItem[]>([])
+  const [payerId, setPayerId] = useState(1)
   const [date, setDate] = useState(getToday)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const nextId = useRef(1)
+
+  function defaultOwner(): 'user' | 'girlfriend' {
+    return payerId === 1 ? 'user' : 'girlfriend'
+  }
 
   useEffect(() => {
     fetchCategories()
@@ -69,7 +75,7 @@ function PhotoEntry() {
             raw_text: item.raw_text,
             price: item.price,
             category_id: item.category_id ?? null,
-            owner: 'user' as const,
+            owner: defaultOwner(),
           }))
         )
         setStep('review')
@@ -107,9 +113,13 @@ function PhotoEntry() {
         raw_text: '',
         price: 0,
         category_id: null,
-        owner: 'user' as const,
+        owner: defaultOwner(),
       },
     ])
+  }
+
+  function handleSetAllOwner(owner: 'user' | 'girlfriend' | '50-50') {
+    setItems((prev) => prev.map((item) => ({ ...item, owner })))
   }
 
   async function handleSave() {
@@ -122,7 +132,7 @@ function PhotoEntry() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date,
-          payer_id: 1,
+          payer_id: payerId,
           items: items.map((item) => ({
             raw_text: item.raw_text,
             price: item.price,
@@ -281,12 +291,17 @@ function PhotoEntry() {
             <DatePicker value={date} onChange={setDate} />
           </div>
 
+          <div style={{ marginBottom: '12px' }}>
+            <PayerToggle value={payerId} onChange={setPayerId} />
+          </div>
+
           <ParsedItemsTable
             items={items}
             categories={categories}
             onItemUpdate={handleItemUpdate}
             onItemRemove={handleItemRemove}
             onItemAdd={handleItemAdd}
+            onSetAllOwner={handleSetAllOwner}
           />
 
           {error && (

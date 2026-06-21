@@ -20,7 +20,14 @@ interface ParsedItemsTableProps {
   onItemUpdate: (id: number, field: string, value: unknown) => void
   onItemRemove: (id: number) => void
   onItemAdd: () => void
+  onSetAllOwner?: (owner: 'user' | 'girlfriend' | '50-50') => void
 }
+
+const ownerOptions: { value: 'user' | 'girlfriend' | '50-50'; label: string }[] = [
+  { value: 'user', label: 'Me' },
+  { value: 'girlfriend', label: 'Her' },
+  { value: '50-50', label: '50/50' },
+]
 
 function ParsedItemsTable({
   items,
@@ -28,6 +35,7 @@ function ParsedItemsTable({
   onItemUpdate,
   onItemRemove,
   onItemAdd,
+  onSetAllOwner,
 }: ParsedItemsTableProps) {
   return (
     <div>
@@ -49,6 +57,39 @@ function ParsedItemsTable({
         <span>Owner</span>
         <span></span>
       </div>
+
+      {onSetAllOwner && items.length > 1 && (
+        <div
+          style={{
+            display: 'flex',
+            gap: '6px',
+            padding: '6px 0',
+            borderBottom: '1px solid var(--border)',
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <span style={{ lineHeight: '28px' }}>Set all to:</span>
+          {ownerOptions.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onSetAllOwner!(opt.value)}
+              style={{
+                padding: '4px 10px',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent)',
+                borderRadius: '4px',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {items.map((item) => (
         <div

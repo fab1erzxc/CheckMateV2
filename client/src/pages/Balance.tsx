@@ -32,7 +32,7 @@ function Balance() {
     try {
       const [balanceRes, settlementsRes] = await Promise.all([
         fetch('/api/balance'),
-        fetch('/api/settlements'),
+        fetch('/api/balance/settlements'),
       ])
       if (balanceRes.ok) setBalanceData(await balanceRes.json())
       if (settlementsRes.ok) setSettlements(await settlementsRes.json())
@@ -70,7 +70,7 @@ function Balance() {
     const toUserId = balanceData.direction === 'user_owes_girlfriend' ? 2 : 1
 
     try {
-      const res = await fetch('/api/settlement', {
+      const res = await fetch('/api/balance/settlement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

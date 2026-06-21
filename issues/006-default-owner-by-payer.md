@@ -17,6 +17,10 @@
 - [ ] Пользователь всё ещё может переключать owner индивидуально через OwnerToggle
 - [ ] Кнопка "Set all to [name]" в ParsedItemsTable меняет owner всех товаров разом
 
+## Status
+
+✅ Completed 2026-06-21
+
 ## Blocked by
 
 - [004: Выбор плательщика при сохранении чека](./004-payer-selector.md)

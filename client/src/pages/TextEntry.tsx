@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import TextInputForm from '../components/TextInputForm'
 import ParsedItemsTable, { ParsedItem } from '../components/ParsedItemsTable'
 import DatePicker from '../components/DatePicker'
+import PayerToggle from '../components/PayerToggle'
 import { DEFAULT_CATEGORIES, getToday } from '../utils'
 
 interface Category {
@@ -15,9 +16,14 @@ function TextEntry() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [items, setItems] = useState<ParsedItem[]>([])
+  const [payerId, setPayerId] = useState(1)
   const [date, setDate] = useState(getToday)
   const [categories, setCategories] = useState<Category[]>([])
   const nextId = useRef(1)
+
+  function defaultOwner(): 'user' | 'girlfriend' {
+    return payerId === 1 ? 'user' : 'girlfriend'
+  }
 
   useEffect(() => {
     fetchCategories()
@@ -55,7 +61,7 @@ function TextEntry() {
             raw_text: item.raw_text,
             price: item.price,
             category_id: item.category_id ?? null,
-            owner: 'user' as const,
+            owner: defaultOwner(),
           }))
         )
         setStep('review')
@@ -87,9 +93,13 @@ function TextEntry() {
         raw_text: '',
         price: 0,
         category_id: null,
-        owner: 'user' as const,
+        owner: defaultOwner(),
       },
     ])
+  }
+
+  function handleSetAllOwner(owner: 'user' | 'girlfriend' | '50-50') {
+    setItems((prev) => prev.map((item) => ({ ...item, owner })))
   }
 
   async function handleSave() {
@@ -102,7 +112,7 @@ function TextEntry() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date,
-          payer_id: 1,
+          payer_id: payerId,
           items: items.map((item) => ({
             raw_text: item.raw_text,
             price: item.price,
@@ -217,12 +227,17 @@ function TextEntry() {
             <DatePicker value={date} onChange={setDate} />
           </div>
 
+          <div style={{ marginBottom: '12px' }}>
+            <PayerToggle value={payerId} onChange={setPayerId} />
+          </div>
+
           <ParsedItemsTable
             items={items}
             categories={categories}
             onItemUpdate={handleItemUpdate}
             onItemRemove={handleItemRemove}
             onItemAdd={handleItemAdd}
+            onSetAllOwner={handleSetAllOwner}
           />
 
           {error && (

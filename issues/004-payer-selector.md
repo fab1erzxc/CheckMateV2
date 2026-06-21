@@ -14,6 +14,10 @@
 - [ ] При сохранении чека с payer_id=2 (Ксюша), долг считается корректно на странице Balance
 - [ ] Существующие тесты на сервере проходят
 
+## Status
+
+✅ Completed 2026-06-21
+
 ## Blocked by
 
 None — can start immediately

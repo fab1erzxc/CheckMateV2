@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import CategorySelect from '../components/CategorySelect'
 import OwnerToggle from '../components/OwnerToggle'
+import PayerToggle from '../components/PayerToggle'
 import { DEFAULT_CATEGORIES } from '../utils'
 
 interface Item {
@@ -124,6 +125,7 @@ function ReceiptDetail() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date: receipt.date,
+          payer_id: receipt.payer_id,
           items: receipt.items.map((item) => ({
             raw_text: item.raw_text || '',
             normalized_name: item.normalized_name || undefined,
@@ -265,10 +267,12 @@ function ReceiptDetail() {
             />
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              Paid by
-            </div>
-            <div style={{ fontWeight: 600 }}>{receipt.payer_name}</div>
+            <PayerToggle
+              value={receipt.payer_id}
+              onChange={(pid) =>
+                setReceipt({ ...receipt, payer_id: pid })
+              }
+            />
           </div>
         </div>
         <div style={{ textAlign: 'right', marginTop: '8px' }}>
