@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import multer from 'multer'
 import { getDatabase } from '../db/database'
-import { parseText, parseReceiptImageFromBase64 } from '../services/parseService'
+import { runParsePipeline } from '../services/parsePipeline'
 
 const router = Router()
 const upload = multer({
@@ -30,7 +30,7 @@ router.post('/text', async (req: Request, res: Response) => {
   }
 
   const db = getDatabase()
-  const result = await parseText(db, text.trim())
+  const result = await runParsePipeline(db, { type: 'text', text: text.trim() })
   res.json(result)
 })
 
@@ -47,7 +47,11 @@ router.post('/receipt', upload.single('image'), async (req: Request, res: Respon
 
   const db = getDatabase()
   const base64 = req.file.buffer.toString('base64')
-  const result = await parseReceiptImageFromBase64(db, base64, req.file.mimetype)
+  const result = await runParsePipeline(db, {
+    type: 'image',
+    imageBase64: base64,
+    mimeType: req.file.mimetype,
+  })
   res.json(result)
 })
 
