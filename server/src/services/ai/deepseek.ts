@@ -1,5 +1,6 @@
 import { ParseResult } from './types'
 import { parseItemsFromContent } from './utils'
+import { aiRequest } from './client'
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
 const DEEPSEEK_MODEL = 'deepseek-v4-flash'
@@ -29,92 +30,50 @@ Output: [{"raw_text": "кокакола 40 лир", "price": 40, "category": "с
 export async function parseTextWithDeepSeek(
   text: string
 ): Promise<ParseResult> {
-  const apiKey = process.env.DEEPSEEK_API_KEY
+  const result = await aiRequest({
+    url: DEEPSEEK_API_URL,
+    body: {
+      model: DEEPSEEK_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: text },
+      ],
+      temperature: 0.1,
+      max_tokens: 2000,
+    },
+    headers: {
+      Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+    },
+    apiKey: process.env.DEEPSEEK_API_KEY ?? '',
+    serviceName: 'DeepSeek',
+  })
 
-  if (!apiKey) {
+  if (!result.ok) {
+    return { success: false, items: [], error: result.error }
+  }
+
+  const data = result.data as {
+    choices: Array<{ message: { content: string } }>
+  }
+
+  if (!data.choices?.[0]?.message?.content) {
     return {
       success: false,
       items: [],
-      error: 'DeepSeek API key not configured',
+      error: 'Empty response from DeepSeek',
     }
   }
 
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 30000)
+  const content = data.choices[0].message.content.trim()
+  const items = parseItemsFromContent(content)
 
-  try {
-    const response = await fetch(DEEPSEEK_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: DEEPSEEK_MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: text },
-        ],
-        temperature: 0.1,
-        max_tokens: 2000,
-      }),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => 'Unknown error')
-      console.error(`DeepSeek API error (${response.status}):`, errorBody)
-      return {
-        success: false,
-        items: [],
-        error: `DeepSeek API returned status ${response.status}`,
-      }
-    }
-
-    const data = (await response.json()) as {
-      choices: Array<{ message: { content: string } }>
-    }
-
-    if (!data.choices?.[0]?.message?.content) {
-      return {
-        success: false,
-        items: [],
-        error: 'Empty response from DeepSeek',
-      }
-    }
-
-    const content = data.choices[0].message.content.trim()
-    const items = parseItemsFromContent(content)
-
-    if (items.length === 0) {
-      return {
-        success: false,
-        items: [],
-        error: 'Could not parse any items from the response',
-      }
-    }
-
-    return { success: true, items }
-  } catch (error) {
-    clearTimeout(timeoutId)
-
-    if (error instanceof Error && error.name === 'AbortError') {
-      return {
-        success: false,
-        items: [],
-        error: 'DeepSeek API request timed out',
-      }
-    }
-
-    console.error('DeepSeek API error:', error)
+  if (items.length === 0) {
     return {
       success: false,
       items: [],
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: 'Could not parse any items from the response',
     }
   }
+
+  return { success: true, items }
 }
-
-

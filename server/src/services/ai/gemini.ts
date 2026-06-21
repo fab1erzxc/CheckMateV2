@@ -1,8 +1,9 @@
 import { ParseResult } from './types'
 import { parseItemsFromContent } from './utils'
+import { aiRequest } from './client'
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 const PROMPT = `Extract all items with prices from this receipt image.
 Ignore totals, tax, discounts, receipt numbers, dates, and any non-item text.
@@ -46,91 +47,57 @@ export async function parseReceiptImage(
     }
   }
 
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 30000)
-
-  try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: PROMPT },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: imageBase64,
-                },
+  const result = await aiRequest({
+    url: `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+    body: {
+      contents: [
+        {
+          parts: [
+            { text: PROMPT },
+            {
+              inline_data: {
+                mime_type: mimeType,
+                data: imageBase64,
               },
-            ],
-          },
-        ],
-      }),
-      signal: controller.signal,
-    })
+            },
+          ],
+        },
+      ],
+    },
+    apiKey,
+    serviceName: 'Gemini',
+  })
 
-    clearTimeout(timeoutId)
+  if (!result.ok) {
+    return { success: false, items: [], error: result.error }
+  }
 
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => 'Unknown error')
-      console.error(`Gemini API error (${response.status}):`, errorBody)
-      return {
-        success: false,
-        items: [],
-        error: `Gemini API returned status ${response.status}`,
+  const data = result.data as {
+    candidates?: Array<{
+      content?: {
+        parts?: Array<{ text?: string }>
       }
-    }
+    }>
+  }
 
-    const data = (await response.json()) as {
-      candidates?: Array<{
-        content?: {
-          parts?: Array<{ text?: string }>
-        }
-      }>
-    }
-
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text
-    if (!content) {
-      return {
-        success: false,
-        items: [],
-        error: 'Empty response from Gemini',
-      }
-    }
-
-    const items = parseItemsFromContent(content.trim())
-
-    if (items.length === 0) {
-      return {
-        success: false,
-        items: [],
-        error: 'Could not parse any items from the response',
-      }
-    }
-
-    return { success: true, items }
-  } catch (error) {
-    clearTimeout(timeoutId)
-
-    if (error instanceof Error && error.name === 'AbortError') {
-      return {
-        success: false,
-        items: [],
-        error: 'Gemini API request timed out',
-      }
-    }
-
-    console.error('Gemini API error:', error)
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text
+  if (!content) {
     return {
       success: false,
       items: [],
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: 'Empty response from Gemini',
     }
   }
+
+  const items = parseItemsFromContent(content.trim())
+
+  if (items.length === 0) {
+    return {
+      success: false,
+      items: [],
+      error: 'Could not parse any items from the response',
+    }
+  }
+
+  return { success: true, items }
 }
-
-
