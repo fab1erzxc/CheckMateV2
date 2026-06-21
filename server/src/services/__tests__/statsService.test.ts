@@ -95,12 +95,27 @@ describe('Stats Service', () => {
 
     it('should filter by person (user only)', () => {
       const stats = calculateStats(db, { period: 'year', person: 'user' })
-      expect(stats.total).toBe(340) // user's share only
+      expect(stats.total).toBe(340) // user's share (100 + 200 + 40)
+      // Categories should only include user's items + 50-50 at full price
+      expect(stats.by_category).toHaveLength(2)
+      const food = stats.by_category.find((c) => c.category === 'базовая еда')
+      expect(food?.amount).toBe(300) // 100 + 200
+      const alcohol = stats.by_category.find((c) => c.category === 'алкоголь')
+      expect(alcohol?.amount).toBe(80) // 50-50 item at full price
+      // Periods should also be filtered
+      const periodSum = stats.by_period.reduce((s, p) => s + p.amount, 0)
+      expect(periodSum).toBe(380) // 100 (user, twoMonthsAgo) + 200+80 (user+50-50, lastMonth)
     })
 
     it('should filter by person (girlfriend only)', () => {
       const stats = calculateStats(db, { period: 'year', person: 'girlfriend' })
-      expect(stats.total).toBe(90) // girlfriend's share only (50 + 40)
+      expect(stats.total).toBe(90) // girlfriend's share (50 + 40)
+      // Categories should only include girlfriend's items + 50-50 at full price
+      expect(stats.by_category).toHaveLength(2)
+      const sweets = stats.by_category.find((c) => c.category === 'сладости/снэки')
+      expect(sweets?.amount).toBe(50)
+      const alcohol = stats.by_category.find((c) => c.category === 'алкоголь')
+      expect(alcohol?.amount).toBe(80) // 50-50 item at full price
     })
 
     it('should filter by category', () => {

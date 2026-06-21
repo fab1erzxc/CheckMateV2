@@ -59,6 +59,14 @@ export function calculateStats(
 
   const whereClause = conditions.join(' AND ')
 
+  // Person filter for category/period breakdowns (includes 50-50 items at full price)
+  let ownerFilter = ''
+  if (personFilter === 'user') {
+    ownerFilter = " AND (ri.owner = 'user' OR ri.owner = '50-50')"
+  } else if (personFilter === 'girlfriend') {
+    ownerFilter = " AND (ri.owner = 'girlfriend' OR ri.owner = '50-50')"
+  }
+
   // Total amount
   let totalQuery = `
     SELECT COALESCE(SUM(ri.price), 0) as total
@@ -75,7 +83,7 @@ export function calculateStats(
     FROM receipt_items ri
     JOIN receipts r ON ri.receipt_id = r.id
     JOIN categories c ON ri.category_id = c.id
-    WHERE ${whereClause}
+    WHERE ${whereClause}${ownerFilter}
     GROUP BY ri.category_id
     ORDER BY amount DESC
   `
@@ -89,7 +97,7 @@ export function calculateStats(
     SELECT substr(r.date, 1, 7) as period, COALESCE(SUM(ri.price), 0) as amount
     FROM receipt_items ri
     JOIN receipts r ON ri.receipt_id = r.id
-    WHERE ${whereClause}
+    WHERE ${whereClause}${ownerFilter}
     GROUP BY substr(r.date, 1, 7)
     ORDER BY period ASC
   `
