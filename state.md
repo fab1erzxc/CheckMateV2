@@ -150,10 +150,19 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - `deepseek.ts` похудел с 120→79 строк, `gemini.ts` с 136→103 строк
    - Добавление нового провайдера (OpenRouter) = ~30 строк вместо 120+
 
+### 2026-06-21 (третья сессия)
+
+9. **Обнаружена отсутствующая core-функция:** `payer_id` захардкожен = 1 в обоих страницах ввода чека. Долги не считаются.
+10. **Созданы issue 004-006:**
+   - `004-payer-selector.md` — UI выбора плательщика (critical)
+   - `005-balance-widget-home.md` — виджет баланса на главной
+   - `006-default-owner-by-payer.md` — умный дефолт owner в зависимости от плательщика
+
 ---
 
 ## Known Issues / Limitations
 
+- ❌ **CRITICAL: payer_id захардкожен = 1** — в `TextEntry.tsx` и `PhotoEntry.tsx` нет UI выбора кто заплатил. Долги не считаются. Issue [#004](./issues/004-payer-selector.md)
 - ❌ **OpenRouter не подключён** — есть ключ в `.env`, но код fallback'а не написан
 - ❌ **Словарь не обновляется** — при ручной смене категории пользователем, `dictionary` не пополняется
 - ❌ **Backup'ы не работают** — папка `backups/` описана, но код авто-бэкапа не реализован
@@ -195,5 +204,6 @@ cd client && npm run dev
 - **Тесты** в `server/src/**/__tests__/` — integration тесты с in-memory SQLite (через `getTestDatabase()`)
 - **Клиентские тесты** — `vitest` через `cd client && npm run test`
 - **Архитектурные issue** — в `issues/` (локальные .md, готовые для реализации)
+- **CRITICAL**: `issues/004-payer-selector.md` — `payer_id` захардкожен = 1, нужно UI выбора плательщика. Без этого долги не считаются.
 - Все API ключи в `.env`: `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`
 - **AI клиент**: `server/src/services/ai/client.ts` — общая `aiRequest()` для HTTP вызовов к AI. Новый провайдер: `client.ts` + один адаптер (~30 строк)
