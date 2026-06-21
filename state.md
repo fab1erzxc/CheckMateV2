@@ -100,7 +100,9 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
 
 ---
 
-## Recent Changes (2026-06-21)
+## Recent Changes
+
+### 2026-06-21 (first session)
 
 1. **Починены AI модели:**
    - `gemini-pro-vision` → `gemini-2.5-flash` (была 404)
@@ -117,6 +119,21 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - Клиент предвыбирает категорию
 
 4. **Добавлены SQLite WAL-файлы в `.gitignore`**
+
+### 2026-06-21 (second session)
+
+5. **Вытащен HTML-генератор из ExportButton:**
+   - `generateHtml()` переехала в `client/src/utils/htmlReport.ts` — чистая функция `htmlReport(stats): string`
+   - `ExportButton` стал тоньше: только UI + вызов `htmlReport()`
+   - Добавлен `vitest` в клиент (npm install)
+   - Написаны 6 тестов для `htmlReport` (полнота, суммы, категории, периоды, люди, пустые данные)
+   - Добавлены скрипты `npm run test` / `npm run test:watch`
+
+6. **Создана папка `issues/`:**
+   - `001-extract-html-report-generator.md` — ✅ completed
+   - `002-deepen-parse-pipeline.md` — ready
+   - `003-ai-client-boilerplate.md` — ready
+   - `README.md` — индекс
 
 ---
 
@@ -161,4 +178,6 @@ cd client && npm run dev
 - **Парсинг фото** использует `multer` (multipart/form-data, поле `image`)
 - **Типы** дублируются: `server/src/services/ai/types.ts` (внутренние) и `client/src/components/ParsedItemsTable.tsx` (UI)
 - **Тесты** в `server/src/**/__tests__/` — integration тесты с in-memory SQLite (через `getTestDatabase()`)
+- **Клиентские тесты** — `vitest` через `cd client && npm run test`
+- **Архитектурные issue** — в `issues/` (локальные .md, готовые для реализации)
 - Все API ключи в `.env`: `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`
