@@ -135,7 +135,7 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
 6. **Создана папка `issues/`:**
    - `001-extract-html-report-generator.md` — ✅ completed
    - `002-deepen-parse-pipeline.md` — ✅ completed
-   - `003-ai-client-boilerplate.md` — ready
+   - `003-ai-client-boilerplate.md` — ✅ completed
    - `README.md` — индекс
 
 7. **Углублён parse pipeline:**
@@ -143,6 +143,12 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - Единый интерфейс: `runParsePipeline(db, input)` где input = `{ type: 'text', text } | { type: 'image', imageBase64, mimeType }`
    - Роут `parse.ts` только вызывает pipeline, не содержит бизнес-логики
    - Написаны 7 тестов: текст, фото, маппинг категорий, fallback словаря, ошибки, пустые данные
+
+8. **Вынесен общий HTTP-слой AI в `client.ts`:**
+   - `server/src/services/ai/client.ts` — общий `aiRequest()` для всех AI-провайдеров
+   - Key check, AbortController, timeout, fetch, обработка статусов, network errors — в одном месте
+   - `deepseek.ts` похудел с 120→79 строк, `gemini.ts` с 136→103 строк
+   - Добавление нового провайдера (OpenRouter) = ~30 строк вместо 120+
 
 ---
 
@@ -190,3 +196,4 @@ cd client && npm run dev
 - **Клиентские тесты** — `vitest` через `cd client && npm run test`
 - **Архитектурные issue** — в `issues/` (локальные .md, готовые для реализации)
 - Все API ключи в `.env`: `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`
+- **AI клиент**: `server/src/services/ai/client.ts` — общая `aiRequest()` для HTTP вызовов к AI. Новый провайдер: `client.ts` + один адаптер (~30 строк)
