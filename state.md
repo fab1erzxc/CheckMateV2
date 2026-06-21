@@ -179,6 +179,11 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - Если плательщик = Макар → новые товары по умолчанию `owner: 'user'`
    - Кнопка "Set all to: Me / Her / 50/50" в ParsedItemsTable
 
+15. **Ревью проекта (от a1f7b57...HEAD):**
+   - **Standards:** 0 нарушений strict mode
+   - **Spec:** всё из issues 001-006 реализовано. Из PRD не хватает: OpenRouter fallback, backup'ы, PWA
+   - **Найденные проблемы:** дубликаты в dictionary (нет UNIQUE), код авто-пополнения словаря продублирован в 3 местах
+
 ---
 
 ## Known Issues / Limitations
@@ -193,6 +198,8 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
 - ❌ **HTTPS / self-signed cert** — для доступа с телефона по Wi-Fi не настроено
 - ⚠️ **`better-sqlite3` требует native build tools** — на Windows нужны Visual Studio Build Tools (node-gyp). Альтернатива — `sql.js` (чистый JS, без сборки)
 - ⚠️ **DeepSeek API может быть недоступен** из некоторых регионов (Китайская цензура)
+- ⚠️ **Дубликаты в словаре** — таблица `dictionary` без UNIQUE constraint на `raw_text`. При повторных сохранениях одного и того же товара плодятся дубликаты. Нужен UPSERT (`INSERT OR REPLACE` или `ON CONFLICT`)
+- ⚠️ **Код авто-пополнения словаря продублирован** — идентичный блок `fetch('/api/dictionary', ...).catch(() => {})` в TextEntry, PhotoEntry, ReceiptDetail. Вынести в общую функцию
 
 ---
 
@@ -228,3 +235,9 @@ cd client && npm run dev
 - **Critical (fixed)**: `issues/004-payer-selector.md` — ✅ completed. Добавлен PayerToggle, `payer_id` выбирается в UI.
 - Все API ключи в `.env`: `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`
 - **AI клиент**: `server/src/services/ai/client.ts` — общая `aiRequest()` для HTTP вызовов к AI. Новый провайдер: `client.ts` + один адаптер (~30 строк)
+- **Приоритеты на будущее:**
+  1. OpenRouter fallback (ключ уже в `.env`)
+  2. Dictionary UPSERT — добавить UNIQUE constraint + `ON CONFLICT DO UPDATE`
+  3. Вынести авто-пополнение словаря в общий хелпер (сейчас дублируется в 3 компонентах)
+  4. Backup'ы (`backups/`)
+  5. PWA + HTTPS
