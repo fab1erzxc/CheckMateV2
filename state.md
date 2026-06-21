@@ -3,9 +3,38 @@
 > Last updated: 2026-06-21 (конец дня)
 > For AI agents resuming work on this project.
 
-## TL;DR
+---
 
-Full-stack receipt scanner + expense tracker for two people (user & girlfriend). React + Express + SQLite. AI-parses text (DeepSeek) and receipt photos (Gemini). Tracks shared debts, shows stats with charts.
+## Quick Resume for Next Session
+
+**Что есть:** Full-stack receipt scanner + expense tracker для двоих (Макар и Ксюша). React + Express + SQLite. AI-парсинг текста (DeepSeek V4 Flash) и фото (Gemini 2.5 Flash). Расчёт долгов с учётом кто платил, кто потреблял, 50-50 сплит. Статистика с графиками.
+
+**Где лежит:** `C:\Users\Makar1\PROG\CheckMateV2`
+
+**Запуск:** `cd server && npm run dev` (порт 3000) + `cd client && npm run dev` (порт 5173)
+
+**Проверки:** `cd server && npm test` (87 тестов), `cd client && npm run test` (6 тестов), `tsc --noEmit`
+
+**Последний коммит:** `2f85f8b` — fix: stats charts filter by person
+
+**Что важно для след. сессии:**
+- `.env` лежит в корне проекта, не в `server/`
+- AI модели: `deepseek-v4-flash` (текст), `gemini-2.5-flash` (фото)
+- База: `server/data.db` (better-sqlite3), авто-инициализация + сиды при старте
+- All 87/87 tests pass ✅
+
+**Ключевые файлы:**
+- `server/src/services/ai/client.ts` — универсальный HTTP-клиент для AI
+- `server/src/services/parsePipeline.ts` — пайплайн парсинга (AI + категоризация)
+- `server/src/services/debtService.ts` — расчёт долгов
+- `client/src/components/PayerToggle.tsx` — переключатель плательщика
+
+**Приоритеты (issues/README.md):**
+1. OpenRouter fallback (ключ уже в `.env`)
+2. Dictionary UPSERT (добавить UNIQUE constraint)
+3. Вынести авто-пополнение словаря в общий хелпер
+4. Backup'ы
+5. PWA + HTTPS
 
 ---
 
@@ -31,14 +60,14 @@ Full-stack receipt scanner + expense tracker for two people (user & girlfriend).
 
 **Важно:** `gemini-pro-vision` удалён Google (404). `deepseek-chat` — deprecated.
 
-### Category Assignment (добавлено 2026-06-21)
+### Category Assignment
 - AI возвращает `category` (название категории) вместе с `raw_text` и `price`
 - Сервер маппит `category_name → category_id` через таблицу `categories`
 - Если AI не определил категорию → fallback в таблицу `dictionary` (по `raw_text`)
 - Клиент принимает `category_id` и предвыбирает его в `<CategorySelect>`
 - Категории: `базовая еда` (1), `сладости/снэки` (2), `алкоголь` (3), `курево` (4), `утварь/химия для дома` (5), `транспорт` (6), `коммуналка` (7), `другое` (8)
 
-### API Endpoints (фактические, не все описаны в PRD)
+### API Endpoints (фактические)
 
 | Метод | Путь | Описание |
 |-------|------|----------|
@@ -86,164 +115,143 @@ Client → POST /api/parse/text (или /receipt)
 Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, category_id, owner}] }
        → receiptService.createReceipt()
        → INSERT INTO receipts + INSERT INTO receipt_items (каждый товар)
+       → После успешного save: POST /api/dictionary для каждого товара с category_id
        → Возвращает полный receipt с items
 ```
 
 ### Debt Calculation (balances)
-- `balance.ts` → `calculateBalance()` в `debtService.ts`
+- `balance.ts` route → `calculateBalance()` в `debtService.ts`
 - Логика: кто платил (`payer_id`) vs кто потребил (`owner`)
 - `owner = 'user' | 'girlfriend' | '50-50'`
 - `payer_id = 1` (Макар) или `2` (Ксюша)
-- Учитываются settlement'ы
+- Учитываются settlement'ы (частичные погашения)
 
 ### Dictionary
 - Таблица `dictionary`: `raw_text → normalized_name + category_id`
 - Используется как fallback при определении категории
 - Автоматически пополняется при сохранении чека (через TextEntry, PhotoEntry, ReceiptDetail)
+- **Известная проблема:** нет UNIQUE constraint — возможны дубликаты
 
----
-
-## Recent Changes
-
-### 2026-06-21 (first session)
-
-1. **Починены AI модели:**
-   - `gemini-pro-vision` → `gemini-2.5-flash` (была 404)
-   - `deepseek-chat` → `deepseek-v4-flash` (была deprecated)
-
-2. **Починен старт сервера:**
-   - Установлены зависимости (`server/node_modules`)
-   - Исправлен путь к `.env` в `server/src/index.ts`
-
-3. **Добавлена автоматическая категоризация:**
-   - AI возвращает `category` в JSON
-   - Сервер маппит `category_name → category_id`
-   - Fallback через словарь
-   - Клиент предвыбирает категорию
-
-4. **Добавлены SQLite WAL-файлы в `.gitignore`**
-
-### 2026-06-21 (second session)
-
-5. **Вытащен HTML-генератор из ExportButton:**
-   - `generateHtml()` переехала в `client/src/utils/htmlReport.ts` — чистая функция `htmlReport(stats): string`
-   - `ExportButton` стал тоньше: только UI + вызов `htmlReport()`
-   - Добавлен `vitest` в клиент (npm install)
-   - Написаны 6 тестов для `htmlReport` (полнота, суммы, категории, периоды, люди, пустые данные)
-   - Добавлены скрипты `npm run test` / `npm run test:watch`
-
-6. **Создана папка `issues/`:**
-   - `001-extract-html-report-generator.md` — ✅ completed
-   - `002-deepen-parse-pipeline.md` — ✅ completed
-   - `003-ai-client-boilerplate.md` — ✅ completed
-   - `README.md` — индекс
-
-7. **Углублён parse pipeline:**
-   - `parseService.ts` переименован в `parsePipeline.ts` — теперь вся цепочка (AI → категоризация) в одном модуле
-   - Единый интерфейс: `runParsePipeline(db, input)` где input = `{ type: 'text', text } | { type: 'image', imageBase64, mimeType }`
-   - Роут `parse.ts` только вызывает pipeline, не содержит бизнес-логики
-   - Написаны 7 тестов: текст, фото, маппинг категорий, fallback словаря, ошибки, пустые данные
-
-8. **Вынесен общий HTTP-слой AI в `client.ts`:**
-   - `server/src/services/ai/client.ts` — общий `aiRequest()` для всех AI-провайдеров
-   - Key check, AbortController, timeout, fetch, обработка статусов, network errors — в одном месте
-   - `deepseek.ts` похудел с 120→79 строк, `gemini.ts` с 136→103 строк
-   - Добавление нового провайдера (OpenRouter) = ~30 строк вместо 120+
-
-### 2026-06-21 (третья сессия) — Core-функции
-
-9. **Обнаружена отсутствующая core-функция:** `payer_id` захардкожен = 1 в обоих страницах ввода чека. Долги не считаются.
-10. **Созданы issue 004-006:**
-   - `004-payer-selector.md` — UI выбора плательщика (critical)
-   - `005-balance-widget-home.md` — виджет баланса на главной
-   - `006-default-owner-by-payer.md` — умный дефолт owner в зависимости от плательщика
-11. **Починен словарь:**
-   - Добавлено авто-пополнение словаря при сохранении нового чека (TextEntry + PhotoEntry)
-   - Ранее словарь пополнялся только через ReceiptDetail (редактирование существующего чека)
-   - Теперь при сохранении любого чека, каждый товар с category_id добавляется в dictionary
-
-12. **Issue 004 — Выбор плательщика (реализован):**
-   - Создан компонент `PayerToggle` (Макар / Ксюша)
-   - Добавлен в TextEntry, PhotoEntry, ReceiptDetail на шаге review
-   - `payer_id` больше не захардкожен = 1, передаётся из выбора пользователя
-   - Пофикшен баг: `balanceRouter` был замаунчен на `/api` вместо `/api/balance` → 404
-   - Исправлены пути settlement/settlements в клиенте
-
-13. **Issue 005 — Виджет баланса на Home (реализован):**
-   - Home загружает `GET /api/balance` при монтировании
-   - Показывает сумму долга, направление (кто кому должен), ссылка на /balance
-   - При ошибке загрузки тихо скрывается
-
-14. **Issue 006 — Умный дефолт owner (реализован):**
-   - Если плательщик = Ксюша → новые товары по умолчанию `owner: 'girlfriend'`
-   - Если плательщик = Макар → новые товары по умолчанию `owner: 'user'`
-   - Кнопка "Set all to: Me / Her / 50/50" в ParsedItemsTable
-
-15. **Ревью проекта (от a1f7b57...HEAD):**
-   - **Standards:** 0 нарушений strict mode
-   - **Spec:** всё из issues 001-006 реализовано. Из PRD не хватает: OpenRouter fallback, backup'ы, PWA
-   - **Найденные проблемы:** дубликаты в dictionary (нет UNIQUE), код авто-пополнения словаря продублирован в 3 местах
-
-16. **Пофикшен баг графиков в Stats:**
-   - `byCategory` и `byPeriod` в statsService не фильтровали по `ri.owner`
-   - Три секции (Мои/Её/Общие) показывали одинаковые графики, хотя total был правильный
-   - Фикс: добавлен `ownerFilter` в запросы category/period при `person=user` или `person=girlfriend`
+### AI Client Layer
+- `server/src/services/ai/client.ts` — универсальный `aiRequest(params)`
+- Принимает: url, headers, body, apiKey, serviceName, timeout
+- Обрабатывает: key check, AbortController, fetch, status errors, JSON, network errors
+- Возвращает `{ ok: true, data } | { ok: false, error }`
+- `deepseek.ts` (79 строк) и `gemini.ts` (103 строки) — только сборка запроса + парсинг ответа
+- Новый провайдер: ~30 строк (client.ts + адаптер)
 
 ---
 
 ## Known Issues / Limitations
 
-- ✅ **payer_id больше не захардкожен** — добавлен PayerToggle (Макар/Ксюша) в TextEntry, PhotoEntry, ReceiptDetail
+- ✅ **payer_id выбирается** — PayerToggle (Макар/Ксюша) в TextEntry, PhotoEntry, ReceiptDetail
+- ✅ **Словарь пополняется** — при сохранении чека товары с category_id добавляются в dictionary
+- ✅ **Графики Stats фильтруются по человеку** — пофикшен баг: `byCategory`/`byPeriod` теперь учитывают `person` filter
 - ❌ **OpenRouter не подключён** — есть ключ в `.env`, но код fallback'а не написан
-- ✅ **Словарь пополняется** — при сохранении чека (TextEntry, PhotoEntry, ReceiptDetail) товары с category_id автоматически добавляются в dictionary
-- ✅ **Графики Stats фильтруются по человеку** — пофикшен баг: `byCategory`/`byPeriod` игнорировали `person=user/girlfriend`, теперь три секции показывают разные данные
-- ❌ **Backup'ы не работают** — папка `backups/` описана, но код авто-бэкапа не реализован
+- ❌ **Backup'ы не работают** — папка `backups/` описана, но код не реализован
 - ❌ **PWA** — service worker и манифест не настроены
 - ❌ **Offline** — не работает
 - ❌ **Multi-currency** — есть поле `currency` в receipts, но UI конвертации нет
 - ❌ **HTTPS / self-signed cert** — для доступа с телефона по Wi-Fi не настроено
-- ⚠️ **`better-sqlite3` требует native build tools** — на Windows нужны Visual Studio Build Tools (node-gyp). Альтернатива — `sql.js` (чистый JS, без сборки)
-- ⚠️ **DeepSeek API может быть недоступен** из некоторых регионов (Китайская цензура)
-- ⚠️ **Дубликаты в словаре** — таблица `dictionary` без UNIQUE constraint на `raw_text`. При повторных сохранениях одного и того же товара плодятся дубликаты. Нужен UPSERT (`INSERT OR REPLACE` или `ON CONFLICT`)
-- ⚠️ **Код авто-пополнения словаря продублирован** — идентичный блок `fetch('/api/dictionary', ...).catch(() => {})` в TextEntry, PhotoEntry, ReceiptDetail. Вынести в общую функцию
+- ⚠️ **`better-sqlite3` требует native build tools** — на Windows нужны Visual Studio Build Tools (node-gyp)
+- ⚠️ **DeepSeek API может быть недоступен** из некоторых регионов
+- ⚠️ **Дубликаты в словаре** — таблица `dictionary` без UNIQUE constraint на `raw_text`
+- ⚠️ **Код авто-пополнения словаря продублирован** — в TextEntry, PhotoEntry, ReceiptDetail
 
 ---
 
-## Setup Quick Reference
+## Recent Changes (today)
 
-```bash
-# Первый раз
-git clone ...
-cp .env.example .env  # заполнить ключи
-npm run install:all    # npm i + cd client && npm i + cd ../server && npm i
+### Session 1 — Fix AI + server
+- AI модели обновлены (gemini-pro-vision → 2.5-flash, deepseek-chat → v4-flash)
+- Сервер починен: установлены зависимости, исправлен dotenv path
+- Добавлена автоматическая категоризация (AI → category_name → category_id → dictionary fallback)
+- Переменная env `закры_API_KEY` → `DEEPSEEK_API_KEY`
 
-# Запуск
-npm run dev            # concurrently запускает server (:3000) + client (:5173)
+### Session 2 — Architecture (issues 001-003)
+- HTML-генератор вытащен из ExportButton в `htmlReport.ts` (+6 тестов vitest)
+- Parse pipeline углублён: `parseService.ts` → `parsePipeline.ts` (+7 тестов)
+- AI клиент вынесен в `client.ts` (deepseek 120→79 строк, gemini 136→103)
 
-# Или по отдельности
-cd server && npm run dev
-cd client && npm run dev
-```
+### Session 3 — Core features (issues 004-006)
+- PayerToggle (Макар/Ксюша) добавлен во все формы
+- Пофикшен баг: balanceRouter маунтился на `/api` вместо `/api/balance`
+- Виджет баланса на Home странице
+- Умный дефолт owner: payer=Ксюша → owner=girlfriend
+- Кнопки "Set all to" в ParsedItemsTable
+- Авто-пополнение словаря при сохранении (было только в ReceiptDetail)
 
-Сайт открывается на `http://localhost:5173`.
+### Session 3.5 — Stats chart fix
+- `byCategory`/`byPeriod` не фильтровали по `ri.owner` — три графика показывали одно и то же
+- Добавлен `ownerFilter` в SQL запросы
 
 ---
 
 ## For Future AI Sessions
 
+### Перед началом работы
+1. Запустить сервер: `cd server && npm run dev`
+2. Запустить клиент: `cd client && npm run dev` 
+3. Проверить тесты: `cd server && npm test` (87), `cd client && npm run test` (6)
+4. Проверить typecheck: `cd server && npx tsc --noEmit`, `cd client && npx tsc --noEmit`
+5. Проверить health: `curl http://localhost:3000/api/health`
+
+### Важные правила
 - **Не менять модели AI** без проверки curl'ом что они живы
-- **Не трогать `.sandcastle/`** — это мусор от прошлой версии проекта
-- **Парсинг фото** использует `multer` (multipart/form-data, поле `image`)
-- **Типы** дублируются: `server/src/services/ai/types.ts` (внутренние) и `client/src/components/ParsedItemsTable.tsx` (UI)
-- **Тесты** в `server/src/**/__tests__/` — integration тесты с in-memory SQLite (через `getTestDatabase()`)
-- **Клиентские тесты** — `vitest` через `cd client && npm run test`
-- **Архитектурные issue** — в `issues/` (локальные .md, готовые для реализации)
-- **Critical (fixed)**: `issues/004-payer-selector.md` — ✅ completed. Добавлен PayerToggle, `payer_id` выбирается в UI.
-- Все API ключи в `.env`: `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`
-- **AI клиент**: `server/src/services/ai/client.ts` — общая `aiRequest()` для HTTP вызовов к AI. Новый провайдер: `client.ts` + один адаптер (~30 строк)
-- **Приоритеты на будущее:**
-  1. OpenRouter fallback (ключ уже в `.env`)
-  2. Dictionary UPSERT — добавить UNIQUE constraint + `ON CONFLICT DO UPDATE`
-  3. Вынести авто-пополнение словаря в общий хелпер (сейчас дублируется в 3 компонентах)
-  4. Backup'ы (`backups/`)
-  5. PWA + HTTPS
+- **Не трогать `.sandcastle/`** — мусор от прошлой версии
+- **Не удалять issues/**, issues/README.md, state.md — контекст для AI
+- **Не переписывать better-sqlite3** на sql.js — пользователь отказался
+
+### Файлы с тестами (server)
+- `server/src/services/__tests__/statsService.test.ts`
+- `server/src/services/__tests__/debtService.test.ts`
+- `server/src/services/__tests__/receiptService.test.ts`
+- `server/src/services/__tests__/dictionaryService.test.ts`
+- `server/src/services/__tests__/parsePipeline.test.ts`
+- `server/src/services/__tests__/deepseek.test.ts`
+- `server/src/services/__tests__/gemini.test.ts`
+- `server/src/db/__tests__/init.test.ts`
+- `server/src/db/__tests__/seed.test.ts`
+- Тесты используют `getTestDatabase()` — in-memory SQLite, не трогают `data.db`
+
+### Файлы с тестами (client)
+- `client/src/utils/__tests__/htmlReport.test.ts`
+- Vitest, без jsdom — чистые функции
+
+### Ключевые модули
+| Модуль | Путь | Назначение |
+|--------|------|------------|
+| AI client | `server/src/services/ai/client.ts` | Универсальный HTTP-клиент для всех AI-провайдеров |
+| DeepSeek | `server/src/services/ai/deepseek.ts` | Адаптер для DeepSeek (текст) |
+| Gemini | `server/src/services/ai/gemini.ts` | Адаптер для Gemini (фото) |
+| Parse pipeline | `server/src/services/parsePipeline.ts` | Пайплайн: AI → парсинг → категоризация |
+| Stats service | `server/src/services/statsService.ts` | Статистика (total, by_category, by_period, by_person) |
+| Debt service | `server/src/services/debtService.ts` | Расчёт долгов (balance + settlement) |
+| Dictionary service | `server/src/services/dictionaryService.ts` | CRUD словаря |
+| Receipt service | `server/src/services/receiptService.ts` | CRUD чеков + товаров |
+| PayerToggle | `client/src/components/PayerToggle.tsx` | Выбор плательщика |
+| ParsedItemsTable | `client/src/components/ParsedItemsTable.tsx` | Таблица товаров с OwnerToggle + CategorySelect |
+| htmlReport | `client/src/utils/htmlReport.ts` | Генерация HTML-отчёта (чистая функция) |
+
+### Приоритеты на будущее
+1. **OpenRouter fallback** — ключ есть в `.env`. Нужен адаптер (~30 строк) + интеграция в parsePipeline
+2. **Dictionary UPSERT** — добавить UNIQUE(raw_text) + `ON CONFLICT DO UPDATE` в dictionaryService
+3. **Вынести авто-пополнение словаря** — сейчас дублируется в TextEntry, PhotoEntry, ReceiptDetail
+4. **Backup'ы** — `backups/` папка описана, код не написан
+5. **PWA + HTTPS** — service worker, manifest, self-signed cert для телефона
+
+### Добавление нового AI-провайдера
+```typescript
+// 1. Создать адаптер (как deepseek.ts или gemini.ts)
+// 2. Использовать aiRequest() из client.ts
+// 3. Интегрировать в parsePipeline.ts
+// ~30 строк кода
+```
+
+### Проверка API ключей
+```bash
+curl -X POST http://localhost:3000/api/parse/text \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Marlboro 150 lira, bread 30 lira"}'
+# Должен вернуть items с category_id
+```
