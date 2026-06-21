@@ -113,6 +113,20 @@ function TextEntry() {
       })
 
       if (res.ok) {
+        // Auto-update dictionary for items with category
+        for (const item of items) {
+          if (item.raw_text && item.category_id) {
+            fetch('/api/dictionary', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                raw_text: item.raw_text,
+                normalized_name: item.raw_text,
+                category_id: item.category_id,
+              }),
+            }).catch(() => {})
+          }
+        }
         setStep('done')
       } else {
         const data = await res.json()

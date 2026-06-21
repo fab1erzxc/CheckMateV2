@@ -157,6 +157,10 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - `004-payer-selector.md` — UI выбора плательщика (critical)
    - `005-balance-widget-home.md` — виджет баланса на главной
    - `006-default-owner-by-payer.md` — умный дефолт owner в зависимости от плательщика
+11. **Починен словарь:**
+   - Добавлено авто-пополнение словаря при сохранении нового чека (TextEntry + PhotoEntry)
+   - Ранее словарь пополнялся только через ReceiptDetail (редактирование существующего чека)
+   - Теперь при сохранении любого чека, каждый товар с category_id добавляется в dictionary
 
 ---
 
@@ -164,7 +168,7 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
 
 - ❌ **CRITICAL: payer_id захардкожен = 1** — в `TextEntry.tsx` и `PhotoEntry.tsx` нет UI выбора кто заплатил. Долги не считаются. Issue [#004](./issues/004-payer-selector.md)
 - ❌ **OpenRouter не подключён** — есть ключ в `.env`, но код fallback'а не написан
-- ❌ **Словарь не обновляется** — при ручной смене категории пользователем, `dictionary` не пополняется
+- ✅ **Словарь пополняется** — при сохранении чека (TextEntry, PhotoEntry, ReceiptDetail) товары с category_id автоматически добавляются в dictionary
 - ❌ **Backup'ы не работают** — папка `backups/` описана, но код авто-бэкапа не реализован
 - ❌ **PWA** — service worker и манифест не настроены
 - ❌ **Offline** — не работает
