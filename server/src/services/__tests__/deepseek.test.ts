@@ -42,8 +42,8 @@ describe('DeepSeek text parsing', () => {
     const result = await parseTextWithDeepSeek('Coca-Cola 40 lira, Bread 15 lira')
     expect(result.success).toBe(true)
     expect(result.items).toHaveLength(2)
-    expect(result.items[0]).toEqual({ raw_text: 'Coca-Cola 40 lira', price: 40 })
-    expect(result.items[1]).toEqual({ raw_text: 'Bread 15 lira', price: 15 })
+    expect(result.items[0]).toEqual({ raw_text: 'Coca-Cola 40 lira', price: 40, category: null, category_id: null })
+    expect(result.items[1]).toEqual({ raw_text: 'Bread 15 lira', price: 15, category: null, category_id: null })
   })
 
   it('should handle API error status codes', async () => {

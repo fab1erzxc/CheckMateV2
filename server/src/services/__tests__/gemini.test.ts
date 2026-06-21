@@ -52,7 +52,7 @@ describe('Gemini Vision parsing', () => {
     const result = await parseReceiptImage('fake-base64')
     expect(result.success).toBe(true)
     expect(result.items).toHaveLength(2)
-    expect(result.items[0]).toEqual({ raw_text: 'Coca-Cola 1L', price: 40 })
+    expect(result.items[0]).toEqual({ raw_text: 'Coca-Cola 1L', price: 40, category: null, category_id: null })
   })
 
   it('should handle API error status codes', async () => {
