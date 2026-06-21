@@ -2,19 +2,29 @@ import { ParseResult } from './types'
 import { parseItemsFromContent } from './utils'
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
-const DEEPSEEK_MODEL = 'deepseek-chat'
+const DEEPSEEK_MODEL = 'deepseek-v4-flash'
 
 const SYSTEM_PROMPT = `You are a receipt parser. Extract all items with prices from the user's expense text.
 Ignore totals, tax, discounts, and receipt numbers.
+Also assign a category to each item from this list:
+- базовая еда (basic food)
+- сладости/снэки (sweets/snacks)
+- алкоголь (alcohol)
+- курево (smoking)
+- утварь/химия для дома (household supplies/chemicals)
+- транспорт (transport)
+- коммуналка (utilities)
+- другое (other)
+
 Return ONLY a valid JSON array in this exact format:
-[{"raw_text": "original item text", "price": number}]
+[{"raw_text": "original item text", "price": number, "category": "category_name"}]
 
 Examples:
 Input: "Coca-Cola 40 lira, potatoes 120 lira"
-Output: [{"raw_text": "Coca-Cola 40 lira", "price": 40}, {"raw_text": "potatoes 120 lira", "price": 120}]
+Output: [{"raw_text": "Coca-Cola 40 lira", "price": 40, "category": "базовая еда"}, {"raw_text": "potatoes 120 lira", "price": 120, "category": "базовая еда"}]
 
 Input: "кокакола 40 лир, картошка 120 лир"
-Output: [{"raw_text": "кокакола 40 лир", "price": 40}, {"raw_text": "картошка 120 лир", "price": 120}]`
+Output: [{"raw_text": "кокакола 40 лир", "price": 40, "category": "сладости/снэки"}, {"raw_text": "картошка 120 лир", "price": 120, "category": "базовая еда"}]`
 
 export async function parseTextWithDeepSeek(
   text: string

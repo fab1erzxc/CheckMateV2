@@ -50,11 +50,11 @@ function TextEntry() {
 
       if (data.success && data.items && data.items.length > 0) {
         setItems(
-          data.items.map((item: { raw_text: string; price: number }) => ({
+          data.items.map((item: { raw_text: string; price: number; category_id?: number | null }) => ({
             id: nextId.current++,
             raw_text: item.raw_text,
             price: item.price,
-            category_id: null,
+            category_id: item.category_id ?? null,
             owner: 'user' as const,
           }))
         )

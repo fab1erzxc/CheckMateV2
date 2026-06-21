@@ -2,15 +2,25 @@ import { ParseResult } from './types'
 import { parseItemsFromContent } from './utils'
 
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
 
 const PROMPT = `Extract all items with prices from this receipt image.
 Ignore totals, tax, discounts, receipt numbers, dates, and any non-item text.
+Also assign a category to each item from this list:
+- базовая еда (basic food)
+- сладости/снэки (sweets/snacks)
+- алкоголь (alcohol)
+- курево (smoking)
+- утварь/химия для дома (household supplies/chemicals)
+- транспорт (transport)
+- коммуналка (utilities)
+- другое (other)
+
 Return ONLY a valid JSON array in this exact format:
-[{"raw_text": "item text from receipt", "price": number}]
+[{"raw_text": "item text from receipt", "price": number, "category": "category_name"}]
 
 Example output:
-[{"raw_text": "Coca-Cola 1L", "price": 40}, {"raw_text": "Bread", "price": 15}]`
+[{"raw_text": "Coca-Cola 1L", "price": 40, "category": "сладости/снэки"}, {"raw_text": "Bread", "price": 15, "category": "базовая еда"}]`
 
 export async function parseReceiptImage(
   imageBase64: string,

@@ -14,7 +14,8 @@ import { getDatabase, setDbPath } from './db/database'
 import { initializeDatabase } from './db/init'
 import { seedDatabase } from './db/seed'
 
-dotenv.config()
+// Load .env from project root (server runs from server/ dir)
+dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') })
 
 // Set database path to server root
 const serverRoot = path.resolve(__dirname, '..')
