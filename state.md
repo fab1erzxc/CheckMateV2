@@ -71,9 +71,12 @@ Full-stack receipt scanner + expense tracker for two people (user & girlfriend).
 ### Parse Flow
 ```
 Client → POST /api/parse/text (или /receipt)
-       → parseService.ts → AI (DeepSeek/Gemini)
-       → parseItemsFromContent() → извлекает [{raw_text, price, category}]
-       → assignCategoryIds() → маппинг category_name → category_id
+       → parse.ts (роут, только HTTP: валидация + ответ)
+       → runParsePipeline(db, input)  ← parsePipeline.ts
+            → AI (DeepSeek или Gemini в зависимости от type)
+            → parseItemsFromContent() → извлекает [{raw_text, price, category}]
+            → assignCategoryIds() → маппинг category_name → category_id
+            → возвращает ParseResult
        → возвращает клиенту [{raw_text, price, category, category_id}]
        → Client отображает в ParsedItemsTable с предвыбранной категорией
 ```
@@ -131,9 +134,15 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
 
 6. **Создана папка `issues/`:**
    - `001-extract-html-report-generator.md` — ✅ completed
-   - `002-deepen-parse-pipeline.md` — ready
+   - `002-deepen-parse-pipeline.md` — ✅ completed
    - `003-ai-client-boilerplate.md` — ready
    - `README.md` — индекс
+
+7. **Углублён parse pipeline:**
+   - `parseService.ts` переименован в `parsePipeline.ts` — теперь вся цепочка (AI → категоризация) в одном модуле
+   - Единый интерфейс: `runParsePipeline(db, input)` где input = `{ type: 'text', text } | { type: 'image', imageBase64, mimeType }`
+   - Роут `parse.ts` только вызывает pipeline, не содержит бизнес-логики
+   - Написаны 7 тестов: текст, фото, маппинг категорий, fallback словаря, ошибки, пустые данные
 
 ---
 

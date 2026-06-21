@@ -27,6 +27,10 @@ input (text | image) → validate → call AI (DeepSeek | Gemini) → assign cat
 - [ ] `POST /api/parse/text` и `/api/parse/receipt` работают как раньше
 - [ ] TypeScript `npm run typecheck` проходит
 
+## Status
+
+✅ Completed 2026-06-21
+
 ## Blocked by
 
 None — can start immediately
