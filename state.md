@@ -184,6 +184,11 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
    - **Spec:** всё из issues 001-006 реализовано. Из PRD не хватает: OpenRouter fallback, backup'ы, PWA
    - **Найденные проблемы:** дубликаты в dictionary (нет UNIQUE), код авто-пополнения словаря продублирован в 3 местах
 
+16. **Пофикшен баг графиков в Stats:**
+   - `byCategory` и `byPeriod` в statsService не фильтровали по `ri.owner`
+   - Три секции (Мои/Её/Общие) показывали одинаковые графики, хотя total был правильный
+   - Фикс: добавлен `ownerFilter` в запросы category/period при `person=user` или `person=girlfriend`
+
 ---
 
 ## Known Issues / Limitations
@@ -191,6 +196,7 @@ Client → POST /api/receipts { date, payer_id, items: [{raw_text, price, catego
 - ✅ **payer_id больше не захардкожен** — добавлен PayerToggle (Макар/Ксюша) в TextEntry, PhotoEntry, ReceiptDetail
 - ❌ **OpenRouter не подключён** — есть ключ в `.env`, но код fallback'а не написан
 - ✅ **Словарь пополняется** — при сохранении чека (TextEntry, PhotoEntry, ReceiptDetail) товары с category_id автоматически добавляются в dictionary
+- ✅ **Графики Stats фильтруются по человеку** — пофикшен баг: `byCategory`/`byPeriod` игнорировали `person=user/girlfriend`, теперь три секции показывают разные данные
 - ❌ **Backup'ы не работают** — папка `backups/` описана, но код авто-бэкапа не реализован
 - ❌ **PWA** — service worker и манифест не настроены
 - ❌ **Offline** — не работает
